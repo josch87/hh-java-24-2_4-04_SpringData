@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class AsterixService {
@@ -31,5 +32,11 @@ public class AsterixService {
                 .build();
 
         return characterRepository.insert(newCharacterToAdd);
+    }
+
+    public Character getCharacterById(String id) {
+        return characterRepository.findById(id)
+                .orElseThrow(
+                        () -> new NoSuchElementException("Can not find character with id " + id));
     }
 }

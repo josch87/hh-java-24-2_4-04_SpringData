@@ -24,4 +24,8 @@ public class AsterixController {
         return asterixService.addCharacter(newCharacter);
     }
 
+    @GetMapping("{id}")
+    Character getCharacter(@PathVariable String id) {
+        return asterixService.getCharacterById(id);
+    }
 }
