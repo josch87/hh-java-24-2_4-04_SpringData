@@ -1,8 +1,6 @@
 package com.aljoschazoeller.java.hhjava242_404_springdata;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +17,11 @@ public class AsterixController {
     @GetMapping
     List<Character> getCharacters() {
         return asterixService.getAllCharacters();
+    }
+
+    @PostMapping
+    Character addCharacter(@RequestBody NewCharacter newCharacter) {
+        return asterixService.addCharacter(newCharacter);
     }
 
 }
