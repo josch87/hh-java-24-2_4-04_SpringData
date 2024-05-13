@@ -39,4 +39,8 @@ public class AsterixService {
                 .orElseThrow(
                         () -> new NoSuchElementException("Can not find character with id " + id));
     }
+
+    public void deleteCharacterById(String id) {
+        characterRepository.deleteById(id);
+    }
 }

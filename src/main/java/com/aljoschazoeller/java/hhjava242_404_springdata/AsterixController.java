@@ -28,4 +28,9 @@ public class AsterixController {
     Character getCharacter(@PathVariable String id) {
         return asterixService.getCharacterById(id);
     }
+
+    @DeleteMapping("{id}")
+    void deleteCharacter(@PathVariable String id) {
+        asterixService.deleteCharacterById(id);
+    }
 }
