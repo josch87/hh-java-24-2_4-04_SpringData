@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 public class AsterixService {
@@ -15,14 +16,16 @@ public class AsterixService {
         this.characterRepository = characterRepository;
     }
 
-    public List<Character> getAllCharacters () {
-        return characterRepository.findAll();
+    public List<Character> getAllCharacters (String name, String profession, Integer age) {
+        return characterRepository.findAll().stream()
+                .filter(character -> name == null || character.getName().equals(name))
+                .filter(character -> profession == null || character.getProfession().equals(profession))
+                .filter(character -> age == null || character.getAge() == age)
+                .collect(Collectors.toList());
     }
 
     public Character addCharacter(NewCharacter newCharacter) {
-
         Instant currentTime = Instant.now();
-
         Character newCharacterToAdd = Character.builder()
                 .name(newCharacter.name())
                 .age(newCharacter.age())
@@ -30,7 +33,6 @@ public class AsterixService {
                 .createdAt(currentTime)
                 .updatedAt(currentTime)
                 .build();
-
         return characterRepository.insert(newCharacterToAdd);
     }
 
