@@ -43,4 +43,17 @@ public class AsterixService {
     public void deleteCharacterById(String id) {
         characterRepository.deleteById(id);
     }
+
+    public boolean exitsCharacterById (String id) {
+        return characterRepository.existsById(id);
+    }
+
+    public Character updateCharacterById(String id, NewCharacter newCharacter) {
+        Character characterToUpdate = getCharacterById(id);
+        characterToUpdate.setName(newCharacter.name());
+        characterToUpdate.setAge(newCharacter.age());
+        characterToUpdate.setUpdatedAt(Instant.now());
+        characterToUpdate.setProfession(newCharacter.profession());
+        return characterRepository.save(characterToUpdate);
+    }
 }

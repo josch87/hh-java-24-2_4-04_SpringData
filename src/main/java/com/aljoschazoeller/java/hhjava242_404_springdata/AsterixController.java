@@ -2,7 +2,9 @@ package com.aljoschazoeller.java.hhjava242_404_springdata;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/asterix/characters")
@@ -32,5 +34,13 @@ public class AsterixController {
     @DeleteMapping("{id}")
     void deleteCharacter(@PathVariable String id) {
         asterixService.deleteCharacterById(id);
+    }
+
+    @PutMapping("{id}")
+    Character updateCharacter(@PathVariable String id, @RequestBody NewCharacter newCharacter) {
+        if (asterixService.exitsCharacterById(id)) {
+            return asterixService.updateCharacterById(id, newCharacter);
+        }
+        return asterixService.addCharacter(newCharacter);
     }
 }
