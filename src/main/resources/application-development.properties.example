@@ -1,0 +1,2 @@
+MONGODB=your_mobogdb_uri_here (e. g. mongodb://<user>:<password>@<host>:<port>/)
+DBNAME=asterixUniverse
