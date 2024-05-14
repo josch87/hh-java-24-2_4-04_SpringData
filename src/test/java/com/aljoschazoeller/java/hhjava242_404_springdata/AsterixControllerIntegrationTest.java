@@ -1,8 +1,6 @@
 package com.aljoschazoeller.java.hhjava242_404_springdata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,9 +10,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.print.attribute.standard.Media;
 import java.time.Instant;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,6 +25,9 @@ class AsterixControllerIntegrationTest {
 
     @Autowired
     CharacterRepository characterRepository;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     @DirtiesContext
@@ -91,8 +92,10 @@ class AsterixControllerIntegrationTest {
                 .andExpect(jsonPath("$.updatedAt").exists())
                 .andReturn();
 
-        String id = JsonPath.parse(result.getResponse().getContentAsString()).read("$.id");
-        Assertions.assertTrue(characterRepository.existsById(id));
+        String response = result.getResponse().getContentAsString();
+        Character responseCharacter = objectMapper.readValue(response, Character.class);
+
+        assertTrue(characterRepository.existsById(responseCharacter.getId()));
     }
 
     @Test
@@ -129,9 +132,9 @@ class AsterixControllerIntegrationTest {
         mockMvc.perform(delete("/api/asterix/characters/1"))
                 .andExpect(status().is(200));
 
-        Assertions.assertFalse(characterRepository.existsById("1"));
-        Assertions.assertTrue(characterRepository.existsById("2"));
-        Assertions.assertTrue(characterRepository.existsById("3"));
+        assertFalse(characterRepository.existsById("1"));
+        assertTrue(characterRepository.existsById("2"));
+        assertTrue(characterRepository.existsById("3"));
     }
 
     @Test
@@ -170,7 +173,7 @@ class AsterixControllerIntegrationTest {
 
         Character persistedCharacter = characterRepository.findById("1").orElseThrow();
 
-        Assertions.assertEquals(36, persistedCharacter.getAge());
-        Assertions.assertEquals("Asterix", persistedCharacter.getName());
+        assertEquals(36, persistedCharacter.getAge());
+        assertEquals("Asterix", persistedCharacter.getName());
     }
 }
