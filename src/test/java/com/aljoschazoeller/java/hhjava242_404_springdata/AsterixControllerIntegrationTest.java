@@ -1,6 +1,8 @@
 package com.aljoschazoeller.java.hhjava242_404_springdata;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,8 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,67 +26,68 @@ class AsterixControllerIntegrationTest {
     MockMvc mockMvc;
 
     @Autowired
-    CharacterRepository characterRepository;
-
-    @Autowired
     ObjectMapper objectMapper;
 
-    @Test
-    @DirtiesContext
-    void getCharactersIntegrationTest_WhenRequestAllCharacter_ThenReturnJsonWith3Characters() throws Exception {
+
+    @BeforeEach
+    void setUp() throws Exception {
         Instant currentDateTime = Instant.now();
         Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
         Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
 
-        characterRepository.save(c1);
-        characterRepository.save(c2);
-        characterRepository.save(c3);
+        mockMvc.perform(post("/api/asterix/characters")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(c1)))
+                .andExpect(status().is(200));
+        mockMvc.perform(post("/api/asterix/characters")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(c2)))
+                .andExpect(status().is(200));
+        mockMvc.perform(post("/api/asterix/characters")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(c3)))
+                .andExpect(status().is(200));
+    }
 
+    @Test
+    @DirtiesContext
+    void getCharactersIntegrationTest_WhenRequestAllCharacter_ThenReturnJsonWith3Characters() throws Exception {
         mockMvc.perform(get("/api/asterix/characters"))
                 .andExpect(status().is(200))
                 .andExpect(content().json("""
                         [
                           {
-                            "id":"1",
                             "name":"Asterix",
                             "age":35,
                             "profession":"Warrior"
                           },
                           {
-                            "id":"2",
                             "name":"Obelix",
                             "age":25,
                             "profession":"Deliveryman"
                           },
                           {
-                            "id":"3",
                             "name":"Omnifix",
-                            "age":17,"profession":"Deliveryman"
+                            "age":17,
+                            "profession":"Deliveryman"
                           }
                         ]
                         """
-                ));
+                ))
+                .andExpect(jsonPath("$[0].id").exists())
+                .andExpect(jsonPath("$[1].id").exists())
+                .andExpect(jsonPath("$[2].id").exists());
     }
 
     @Test
     @DirtiesContext
     void getCharactersIntegrationTest_WhenRequestDeliverymanWithAge25_ThenReturnJsonWithObelix() throws Exception {
-        Instant currentDateTime = Instant.now();
-        Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
-        Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
-        Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
-
-        characterRepository.save(c1);
-        characterRepository.save(c2);
-        characterRepository.save(c3);
-
         mockMvc.perform(get("/api/asterix/characters?profession=Deliveryman&age=25"))
                 .andExpect(status().is(200))
                 .andExpect(content().json("""
                         [
                           {
-                            "id":"2",
                             "name":"Obelix",
                             "age":25,
                             "profession":"Deliveryman"
@@ -122,61 +125,85 @@ class AsterixControllerIntegrationTest {
         String response = result.getResponse().getContentAsString();
         Character responseCharacter = objectMapper.readValue(response, Character.class);
 
-        assertTrue(characterRepository.existsById(responseCharacter.getId()));
-    }
-
-    @Test
-    @DirtiesContext
-    void getCharacterIntegrationTest_WhenGet1_ThenReturnJsonWithCharacter1() throws Exception {
-        Instant currentDateTime = Instant.now();
-        Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
-        characterRepository.save(c1);
-
-        mockMvc.perform(get("/api/asterix/characters/1"))
+        mockMvc.perform(get("/api/asterix/characters/" + responseCharacter.getId()))
                 .andExpect(status().is(200))
                 .andExpect(content().json("""
                         {
-                          "id":"1",
-                          "name":"Asterix",
-                          "age":35,
-                          "profession":"Warrior"
+                            "name": "Asterix",
+                            "age": 35,
+                            "profession": "Warrior"
                         }
                         """));
     }
 
     @Test
     @DirtiesContext
+    void getCharacterIntegrationTest_WhenGet1_ThenReturnJsonWithCharacter1() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/asterix/characters?name=Asterix&age=35&profession=Warrior"))
+                .andExpect(status().is(200))
+                .andReturn();
+
+        String resultAsString = result.getResponse().getContentAsString();
+        List<Character> resultList = objectMapper.readValue(resultAsString, new TypeReference<List<Character>>() {
+        });
+        Character asterix = resultList.getFirst();
+
+        mockMvc.perform(get("/api/asterix/characters/" + asterix.getId()))
+                .andExpect(status().is(200))
+                .andExpect(content().json("""
+                        {
+                          "name":"Asterix",
+                          "age":35,
+                          "profession":"Warrior"
+                        }
+                        """))
+                .andExpect(jsonPath("$.id").value(asterix.getId()));
+    }
+
+    @Test
+    @DirtiesContext
     void deleteCharacterIntegrationTest_WhenDelete1_Then200AndDeletedInDb() throws Exception {
-        Instant currentDateTime = Instant.now();
-        Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
-        Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
-        Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
+        MvcResult result = mockMvc.perform(get("/api/asterix/characters?name=Asterix"))
+                .andExpect(status().is(200))
+                .andReturn();
+        String resultAsString = result.getResponse().getContentAsString();
+        List<Character> resultAsList = objectMapper.readValue(resultAsString, new TypeReference<List<Character>>() {
+        });
+        Character asterix = resultAsList.getFirst();
 
-        characterRepository.save(c1);
-        characterRepository.save(c2);
-        characterRepository.save(c3);
-
-        mockMvc.perform(delete("/api/asterix/characters/1"))
+        mockMvc.perform(delete("/api/asterix/characters/" + asterix.getId()))
                 .andExpect(status().is(200));
 
-        assertFalse(characterRepository.existsById("1"));
-        assertTrue(characterRepository.existsById("2"));
-        assertTrue(characterRepository.existsById("3"));
+        mockMvc.perform(get("/api/asterix/characters"))
+                .andExpect(status().is(200))
+                .andExpect(content().json("""
+                        [
+                            {
+                              "name":"Obelix",
+                              "age":25,
+                              "profession":"Deliveryman"
+                            },
+                            {
+                              "name":"Omnifix",
+                              "age":17,
+                              "profession":"Deliveryman"
+                            }
+                        ]
+                        """));
     }
 
     @Test
     @DirtiesContext
     void updateCharacterIntegrationTest_WhenAsterixGetsOlder_ThenReturnAndPersistInDb() throws Exception {
-        Instant currentDateTime = Instant.now();
-        Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
-        Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
-        Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
+        MvcResult result = mockMvc.perform(get("/api/asterix/characters?name=Asterix"))
+                .andExpect(status().is(200))
+                .andReturn();
+        String resultAsString = result.getResponse().getContentAsString();
+        List<Character> resultAsList = objectMapper.readValue(resultAsString, new TypeReference<List<Character>>() {
+        });
+        Character asterix = resultAsList.getFirst();
 
-        characterRepository.save(c1);
-        characterRepository.save(c2);
-        characterRepository.save(c3);
-
-        mockMvc.perform(put("/api/asterix/characters/1")
+        mockMvc.perform(put("/api/asterix/characters/" + asterix.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -191,16 +218,21 @@ class AsterixControllerIntegrationTest {
                 .andExpect(status().is(200))
                 .andExpect(content().json("""
                         {
-                          "id":"1",
+                          "name":"Asterix",
+                          "age":36,
+                          "profession":"Warrior"
+                        }
+                        """))
+                .andExpect(jsonPath("$.id").value(asterix.getId()));
+
+        mockMvc.perform(get("/api/asterix/characters/" + asterix.getId()))
+                .andExpect(status().is(200))
+                .andExpect(content().json("""
+                        {
                           "name":"Asterix",
                           "age":36,
                           "profession":"Warrior"
                         }
                         """));
-
-        Character persistedCharacter = characterRepository.findById("1").orElseThrow();
-
-        assertEquals(36, persistedCharacter.getAge());
-        assertEquals("Asterix", persistedCharacter.getName());
     }
 }
