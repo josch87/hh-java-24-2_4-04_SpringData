@@ -3,8 +3,8 @@ package com.aljoschazoeller.java.hhjava242_404_springdata;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -21,8 +21,9 @@ class AsterixServiceTest {
         Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
 
-        //WHEN
         when(characterRepository.findAll()).thenReturn(List.of(c1,c2));
+
+        //WHEN
         List<Character> actual = asterixService.getAllCharacters(null, null , null);
 
         //THEN
@@ -38,8 +39,9 @@ class AsterixServiceTest {
         Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
 
-        //WHEN
         when(characterRepository.findAll()).thenReturn(List.of(c1,c2));
+
+        //WHEN
         List<Character> actual = asterixService.getAllCharacters(null, null , 35);
 
         //THEN
@@ -56,8 +58,9 @@ class AsterixServiceTest {
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
         Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
 
-        //WHEN
         when(characterRepository.findAll()).thenReturn(List.of(c1, c2, c3));
+
+        //WHEN
         List<Character> actual = asterixService.getAllCharacters(null, "Deliveryman" , null);
 
         //THEN
@@ -73,8 +76,9 @@ class AsterixServiceTest {
         Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
 
-        //WHEN
         when(characterRepository.findAll()).thenReturn(List.of(c1,c2));
+
+        //WHEN
         List<Character> actual = asterixService.getAllCharacters("Asterix", null , null);
 
         //THEN
@@ -91,8 +95,9 @@ class AsterixServiceTest {
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
         Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
 
-        //WHEN
         when(characterRepository.findAll()).thenReturn(List.of(c1, c2, c3));
+
+        //WHEN
         List<Character> actual = asterixService.getAllCharacters(null, "Deliveryman" , 25);
 
         //THEN
@@ -102,15 +107,16 @@ class AsterixServiceTest {
     }
 
     @Test
-    void getAllCharactersTest_WhenProfessionDeliverymanAngAge25AndNameTestifix_ReturnOEmptyList() {
+    void getAllCharactersTest_WhenProfessionDeliverymanAngAge25AndNameTestifix_ReturnEmptyList() {
         //GIVEN
         Instant currentDateTime = Instant.now();
         Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
         Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
 
-        //WHEN
         when(characterRepository.findAll()).thenReturn(List.of(c1, c2, c3));
+
+        //WHEN
         List<Character> actual = asterixService.getAllCharacters("Testifix", "Deliveryman" , 25);
 
         //THEN
