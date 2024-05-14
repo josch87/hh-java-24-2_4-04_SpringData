@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,12 +51,12 @@ public class AsterixService {
         return characterRepository.existsById(id);
     }
 
-    public Character updateCharacterById(String id, NewCharacter newCharacter) {
-        Character characterToUpdate = getCharacterById(id);
-        characterToUpdate.setName(newCharacter.name());
-        characterToUpdate.setAge(newCharacter.age());
+    public Character updateCharacterById(Character characterToUpdate) {
         characterToUpdate.setUpdatedAt(Instant.now());
-        characterToUpdate.setProfession(newCharacter.profession());
+
+        Character existingCharacter = characterRepository.findById(characterToUpdate.getId())
+                .orElseThrow(() -> new NoSuchElementException("Could not find character with id " + characterToUpdate.getId()));
+        characterToUpdate.setCreatedAt(existingCharacter.getCreatedAt());
         return characterRepository.save(characterToUpdate);
     }
 }

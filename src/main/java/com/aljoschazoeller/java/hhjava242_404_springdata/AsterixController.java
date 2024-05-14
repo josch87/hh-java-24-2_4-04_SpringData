@@ -62,7 +62,13 @@ public class AsterixController {
     @PutMapping("{id}")
     Character updateCharacter(@PathVariable String id, @RequestBody NewCharacter newCharacter) {
         if (asterixService.exitsCharacterById(id)) {
-            return asterixService.updateCharacterById(id, newCharacter);
+            Character characterToUpdate = Character.builder()
+                    .id(id)
+                    .name(newCharacter.name())
+                    .profession(newCharacter.profession())
+                    .age(newCharacter.age())
+                    .build();
+            return asterixService.updateCharacterById(characterToUpdate);
         }
         return asterixService.addCharacter(newCharacter);
     }
