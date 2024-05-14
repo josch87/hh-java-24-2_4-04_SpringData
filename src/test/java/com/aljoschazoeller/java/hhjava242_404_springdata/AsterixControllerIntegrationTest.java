@@ -69,6 +69,33 @@ class AsterixControllerIntegrationTest {
 
     @Test
     @DirtiesContext
+    void getCharactersIntegrationTest_WhenRequestDeliverymanWithAge25_ThenReturnJsonWithObelix() throws Exception {
+        Instant currentDateTime = Instant.now();
+        Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
+        Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
+        Character c3 = new Character("3", "Omnifix", 17, "Deliveryman", currentDateTime, currentDateTime);
+
+        characterRepository.save(c1);
+        characterRepository.save(c2);
+        characterRepository.save(c3);
+
+        mockMvc.perform(get("/api/asterix/characters?profession=Deliveryman&age=25"))
+                .andExpect(status().is(200))
+                .andExpect(content().json("""
+                        [
+                          {
+                            "id":"2",
+                            "name":"Obelix",
+                            "age":25,
+                            "profession":"Deliveryman"
+                          }
+                        ]
+                        """
+                ));
+    }
+
+    @Test
+    @DirtiesContext
     void addCharacterIntegrationTest_WhenPostCharacter_ReturnCharacter() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/asterix/characters")
                         .contentType(MediaType.APPLICATION_JSON)
