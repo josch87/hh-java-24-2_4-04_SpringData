@@ -136,7 +136,7 @@ class AsterixControllerIntegrationTest {
 
     @Test
     @DirtiesContext
-    void updateCharacter() throws Exception {
+    void updateCharacterIntegrationTest_WhenAsterixGetsOlder_ThenReturnAndPersistInDb() throws Exception {
         Instant currentDateTime = Instant.now();
         Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
         Character c2 = new Character("2", "Obelix", 25, "Deliveryman", currentDateTime, currentDateTime);
