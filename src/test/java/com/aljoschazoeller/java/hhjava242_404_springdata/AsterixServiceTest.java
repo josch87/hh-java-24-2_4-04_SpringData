@@ -163,30 +163,26 @@ class AsterixServiceTest {
     void updateCharacterByIdTest_WhenAsterixTurns36_UpdateAge() {
         //GIVEN
         Instant currentDateTime = Instant.ofEpochSecond(50000);
+
         Character c1 = new Character("1", "Asterix", 35, "Warrior", currentDateTime, currentDateTime);
         Character c1Update = new Character("1", "Asterix", 36, "Warrior", currentDateTime, currentDateTime);
 
         when(characterRepository.findById("1")).thenReturn(Optional.of(c1));
         when(characterRepository.save(any(Character.class))).thenAnswer(returnsFirstArg());
         //WHEN
-        System.out.println("c1Update before updateCharacterById(): " + c1Update);
         Character actual = asterixService.updateCharacterById(c1Update);
 
         //THEN
         verify(characterRepository).findById("1");
         verify(characterRepository).save(any(Character.class));
 
-        assertEquals(c1Update.getName(), actual.getName());
-        assertEquals(c1Update.getAge(), actual.getAge());
-        assertEquals(c1Update.getProfession(), actual.getProfession());
-        assertEquals(c1Update.getId(), actual.getId());
-        assertEquals(c1Update.getCreatedAt(), actual.getCreatedAt());
-        assertEquals(c1Update.getUpdatedAt(), actual.getUpdatedAt());
-//        assertEquals(c1.getUpdatedAt(), actual.getUpdatedAt());
-        System.out.println("c1: " + c1);
-        System.out.println("c1Update: " + c1Update);
-        System.out.println("actual: " + actual);
-//        assertEquals(c1Update, actual);
+        Character expected = new Character("1", "Asterix", 36, "Warrior", currentDateTime, currentDateTime);
+
+        assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getAge(), actual.getAge());
+        assertEquals(expected.getProfession(), actual.getProfession());
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getCreatedAt(), actual.getCreatedAt());
     }
 
 

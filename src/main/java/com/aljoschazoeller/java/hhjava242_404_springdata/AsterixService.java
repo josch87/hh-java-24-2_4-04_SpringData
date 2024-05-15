@@ -52,11 +52,9 @@ public class AsterixService {
     }
 
     public Character updateCharacterById(Character characterToUpdate) {
-        characterToUpdate.setUpdatedAt(Instant.now());
-
         Character existingCharacter = characterRepository.findById(characterToUpdate.getId())
                 .orElseThrow(() -> new NoSuchElementException("Could not find character with id " + characterToUpdate.getId()));
-        characterToUpdate.setCreatedAt(existingCharacter.getCreatedAt());
-        return characterRepository.save(characterToUpdate);
+        Character characterToUpdateWithTime = characterToUpdate.withUpdatedAt((Instant.now())).withCreatedAt(existingCharacter.getCreatedAt());
+        return characterRepository.save(characterToUpdateWithTime);
     }
 }
